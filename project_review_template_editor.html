@@ -132,6 +132,7 @@
       <div class="actions">
         <button class="primary" id="btnSave">保存到模板</button>
         <button id="btnPreview">打开预览页</button>
+        <button id="btnOpenFormEditor">打开表单编辑器</button>
         <button id="btnFormat">格式化JSON</button>
         <button id="btnLoadDefault">恢复默认模板</button>
         <button id="btnExport">导出JSON</button>
@@ -240,6 +241,10 @@
 
     document.getElementById("btnPreview").addEventListener("click", () => {
       window.open("./project_review_template.html", "_blank");
+    });
+
+    document.getElementById("btnOpenFormEditor").addEventListener("click", () => {
+      window.open("./project_review_template_form_editor.html", "_blank");
     });
 
     document.getElementById("btnFormat").addEventListener("click", () => {

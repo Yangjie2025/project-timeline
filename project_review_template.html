@@ -350,6 +350,7 @@
     <div class="toolbar">
       <button class="btn" id="btnReload">重新加载配置</button>
       <button class="btn" id="btnOpenEditor">打开编辑器</button>
+      <button class="btn" id="btnOpenFormEditor">打开表单编辑器</button>
     </div>
 
     <header class="hero">
@@ -735,6 +736,9 @@
     document.getElementById("btnReload").addEventListener("click", render);
     document.getElementById("btnOpenEditor").addEventListener("click", () => {
       window.open("./project_review_template_editor.html", "_blank");
+    });
+    document.getElementById("btnOpenFormEditor").addEventListener("click", () => {
+      window.open("./project_review_template_form_editor.html", "_blank");
     });
 
     render();

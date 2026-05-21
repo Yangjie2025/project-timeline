@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Form Editor</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --line: #dbe3f6;
+      --text: #1b2a4a;
+      --muted: #60708f;
+      --accent: #3366ff;
+      --shadow: 0 12px 28px rgba(40, 66, 122, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 50%, #ffffff 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    h2 { margin: 0 0 10px; font-size: 16px; }
+
+    .hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .section + .section { margin-top: 14px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .field { display: grid; gap: 5px; }
+    .field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid #cfdaf5;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #1f2f57;
+      background: #fbfcff;
+    }
+
+    textarea { min-height: 72px; resize: vertical; }
+
+    .full { grid-column: 1 / -1; }
+
+    .phase-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .phase-item {
+      border: 1px solid #d8e2f8;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fcfdff;
+    }
+
+    .phase-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .btns { display: grid; gap: 10px; }
+
+    button {
+      width: 100%;
+      border: 1px solid #b9c7ea;
+      background: #fff;
+      color: #1b2a4a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .danger {
+      border-color: #efb3b3;
+      color: #b91c1c;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      min-height: 18px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1200px) {
+      .page { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="panel">
+      <h1>项目回顾模板表单编辑器</h1>
+      <p class="hint">不需要改JSON，直接填表。保存后到预览页查看。</p>
+
+      <div class="section">
+        <h2>基础信息</h2>
+        <div class="grid">
+          <div class="field full"><label>项目标题</label><input id="projectTitle" /></div>
+          <div class="field full"><label>副标题</label><input id="projectSubtitle" /></div>
+          <div class="field"><label>计划年份</label><input id="scheduleYear" type="number" /></div>
+          <div class="field"><label>倒计时月份</label><input id="deadlineMonth" type="number" min="1" max="12" /></div>
+          <div class="field"><label>倒计时日期</label><input id="deadlineDay" type="number" min="1" max="31" /></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>顶部摘要文案</h2>
+        <div class="grid">
+          <div class="field"><label>主要信息标题</label><input id="labelMainInfo" /></div>
+          <div class="field"><label>项目阶段标题</label><input id="labelStages" /></div>
+          <div class="field"><label>总周期标题</label><input id="labelDuration" /></div>
+          <div class="field"><label>状态统计标题</label><input id="labelStats" /></div>
+          <div class="field"><label>倒计时标题</label><input id="labelCountdown" /></div>
+          <div class="field full"><label>主要信息（每行一条）</label><textarea id="mainInfoPoints"></textarea></div>
+          <div class="field full"><label>当前阶段文案</label><input id="currentStageText" /></div>
+          <div class="field full"><label>倒计时提示文案</label><input id="countdownHint" /></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>延期区域文案</h2>
+        <div class="grid">
+          <div class="field full"><label>区块标题</label><input id="delayTitle" /></div>
+          <div class="field full"><label>Challenge 文案</label><textarea id="challengeText"></textarea></div>
+          <div class="field full"><label>Root Cause（每行一条）</label><textarea id="rootCauseList"></textarea></div>
+          <div class="field full"><label>Mitigation Plan（每行一条）</label><textarea id="mitigationList"></textarea></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>阶段任务</h2>
+        <div id="phaseList" class="phase-list"></div>
+        <button id="btnAddPhase">+ 新增阶段</button>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="btns">
+        <button class="primary" id="btnSave">保存到模板</button>
+        <button id="btnPreview">打开预览页</button>
+        <button id="btnOpenJsonEditor">打开JSON编辑器</button>
+        <button id="btnReload">重新加载当前配置</button>
+      </div>
+      <div class="status" id="status"></div>
+    </aside>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "projectReviewTemplateConfig";
+
+    const defaultConfig = {
+      meta: {
+        projectTitle: "Project Execution Timeline",
+        subtitle: "可复用项目回顾模板（支持编辑器改字）",
+        scheduleYear: 2026,
+        deadline: { month: 6, day: 30, label: "6.30截止倒计时" },
+        footer: "点击任务节点可高亮并查看详情"
+      },
+      summary: {
+        labels: {
+          mainInfo: "主要信息",
+          stages: "项目阶段",
+          totalDuration: "总周期",
+          statusStats: "状态统计",
+          countdown: "6.30截止倒计时"
+        },
+        mainInfoPoints: ["费用影响：无", "业务影响：无", "CPS影响：可按项目定义替换"],
+        currentStageText: "当前阶段：按项目更新",
+        countdownHint: "距离截止日期还有"
+      },
+      legend: [
+        { text: "绿色：已完成", type: "complete" },
+        { text: "紫色：进行中", type: "progress" },
+        { text: "灰色：计划阶段", type: "planned" },
+        { text: "紫黄各半：延期阶段", type: "delayed" }
+      ],
+      delaySection: {
+        title: "延期原因与补偿计划",
+        sections: [
+          { title: "Challenge:", mode: "text", text: "在此填写挑战描述。" },
+          { title: "Root Cause:", mode: "ul", items: ["根因1", "根因2"] },
+          { title: "Mitigation Plan:", mode: "ol", items: ["措施1", "措施2"] }
+        ]
+      },
+      phases: []
+    };
+
+    function setStatus(text, isError = false) {
+      const el = document.getElementById("status");
+      el.style.color = isError ? "#b91c1c" : "#60708f";
+      el.textContent = text;
+    }
+
+    function loadConfig() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredClone(defaultConfig);
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed;
+      } catch {
+        return structuredClone(defaultConfig);
+      }
+    }
+
+    function phaseTemplate(index = 1) {
+      return {
+        title: `Phase ${index}`,
+        planStart: "2026-01-01",
+        planEnd: "2026-01-05",
+        start: "2026-01-01",
+        end: "2026-01-05",
+        statusLabel: "TBD",
+        visualStatus: "planned",
+        blocker: "",
+        note: ""
+      };
+    }
+
+    function splitLines(value) {
+      return value
+        .split("\n")
+        .map((x) => x.trim())
+        .filter(Boolean);
+    }
+
+    function renderPhases(phases) {
+      const box = document.getElementById("phaseList");
+      box.innerHTML = "";
+
+      phases.forEach((phase, index) => {
+        const wrap = document.createElement("div");
+        wrap.className = "phase-item";
+        wrap.dataset.index = String(index);
+        wrap.innerHTML = `
+          <div class="phase-head">
+            <span>阶段 ${index + 1}</span>
+            <button class="danger" data-remove="${index}">删除</button>
+          </div>
+          <div class="grid">
+            <div class="field full"><label>阶段标题</label><input data-k="title" value="${phase.title || ""}" /></div>
+            <div class="field"><label>计划开始</label><input data-k="planStart" type="date" value="${phase.planStart || ""}" /></div>
+            <div class="field"><label>计划结束</label><input data-k="planEnd" type="date" value="${phase.planEnd || ""}" /></div>
+            <div class="field"><label>实际开始</label><input data-k="start" type="date" value="${phase.start || ""}" /></div>
+            <div class="field"><label>实际结束</label><input data-k="end" type="date" value="${phase.end || ""}" /></div>
+            <div class="field"><label>状态标签</label><input data-k="statusLabel" value="${phase.statusLabel || ""}" /></div>
+            <div class="field"><label>颜色状态</label>
+              <select data-k="visualStatus">
+                <option value="complete" ${phase.visualStatus === "complete" ? "selected" : ""}>complete</option>
+                <option value="progress" ${phase.visualStatus === "progress" ? "selected" : ""}>progress</option>
+                <option value="planned" ${phase.visualStatus === "planned" ? "selected" : ""}>planned</option>
+                <option value="delayed" ${phase.visualStatus === "delayed" ? "selected" : ""}>delayed</option>
+              </select>
+            </div>
+            <div class="field full"><label>阻塞说明</label><input data-k="blocker" value="${phase.blocker || ""}" /></div>
+            <div class="field full"><label>备注</label><input data-k="note" value="${phase.note || ""}" /></div>
+          </div>
+        `;
+        box.appendChild(wrap);
+      });
+
+      box.querySelectorAll("button[data-remove]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = Number(btn.dataset.remove);
+          phases.splice(i, 1);
+          renderPhases(phases);
+        });
+      });
+    }
+
+    function bind(config) {
+      document.getElementById("projectTitle").value = config.meta?.projectTitle || "";
+      document.getElementById("projectSubtitle").value = config.meta?.subtitle || "";
+      document.getElementById("scheduleYear").value = config.meta?.scheduleYear || 2026;
+      document.getElementById("deadlineMonth").value = config.meta?.deadline?.month || 6;
+      document.getElementById("deadlineDay").value = config.meta?.deadline?.day || 30;
+
+      document.getElementById("labelMainInfo").value = config.summary?.labels?.mainInfo || "";
+      document.getElementById("labelStages").value = config.summary?.labels?.stages || "";
+      document.getElementById("labelDuration").value = config.summary?.labels?.totalDuration || "";
+      document.getElementById("labelStats").value = config.summary?.labels?.statusStats || "";
+      document.getElementById("labelCountdown").value = config.summary?.labels?.countdown || "";
+      document.getElementById("mainInfoPoints").value = (config.summary?.mainInfoPoints || []).join("\n");
+      document.getElementById("currentStageText").value = config.summary?.currentStageText || "";
+      document.getElementById("countdownHint").value = config.summary?.countdownHint || "";
+
+      document.getElementById("delayTitle").value = config.delaySection?.title || "";
+      const sections = config.delaySection?.sections || [];
+      const challenge = sections.find((x) => x.title?.toLowerCase().includes("challenge"));
+      const root = sections.find((x) => x.title?.toLowerCase().includes("root"));
+      const mitigation = sections.find((x) => x.title?.toLowerCase().includes("mitigation"));
+      document.getElementById("challengeText").value = challenge?.text || "";
+      document.getElementById("rootCauseList").value = (root?.items || []).join("\n");
+      document.getElementById("mitigationList").value = (mitigation?.items || []).join("\n");
+
+      const phases = Array.isArray(config.phases) ? config.phases : [];
+      if (!phases.length) phases.push(phaseTemplate(1));
+      renderPhases(phases);
+      window.__phases = phases;
+    }
+
+    function collect() {
+      const phases = window.__phases || [];
+      const phaseItems = Array.from(document.querySelectorAll(".phase-item"));
+      const resultPhases = phaseItems.map((item) => {
+        const obj = {};
+        item.querySelectorAll("[data-k]").forEach((el) => {
+          obj[el.dataset.k] = el.value;
+        });
+        return obj;
+      });
+
+      return {
+        meta: {
+          projectTitle: document.getElementById("projectTitle").value.trim(),
+          subtitle: document.getElementById("projectSubtitle").value.trim(),
+          scheduleYear: Number(document.getElementById("scheduleYear").value || 2026),
+          deadline: {
+            month: Number(document.getElementById("deadlineMonth").value || 6),
+            day: Number(document.getElementById("deadlineDay").value || 30),
+            label: document.getElementById("labelCountdown").value.trim()
+          },
+          footer: "点击任务节点可高亮并查看详情"
+        },
+        summary: {
+          labels: {
+            mainInfo: document.getElementById("labelMainInfo").value.trim(),
+            stages: document.getElementById("labelStages").value.trim(),
+            totalDuration: document.getElementById("labelDuration").value.trim(),
+            statusStats: document.getElementById("labelStats").value.trim(),
+            countdown: document.getElementById("labelCountdown").value.trim()
+          },
+          mainInfoPoints: splitLines(document.getElementById("mainInfoPoints").value),
+          currentStageText: document.getElementById("currentStageText").value.trim(),
+          countdownHint: document.getElementById("countdownHint").value.trim()
+        },
+        legend: [
+          { text: "绿色：已完成", type: "complete" },
+          { text: "紫色：进行中", type: "progress" },
+          { text: "灰色：计划阶段", type: "planned" },
+          { text: "紫黄各半：延期阶段", type: "delayed" }
+        ],
+        delaySection: {
+          title: document.getElementById("delayTitle").value.trim(),
+          sections: [
+            { title: "Challenge:", mode: "text", text: document.getElementById("challengeText").value.trim() },
+            { title: "Root Cause:", mode: "ul", items: splitLines(document.getElementById("rootCauseList").value) },
+            { title: "Mitigation Plan:", mode: "ol", items: splitLines(document.getElementById("mitigationList").value) }
+          ]
+        },
+        phases: resultPhases.length ? resultPhases : phases
+      };
+    }
+
+    function init() {
+      const config = loadConfig();
+      bind(config);
+
+      document.getElementById("btnAddPhase").addEventListener("click", () => {
+        window.__phases.push(phaseTemplate(window.__phases.length + 1));
+        renderPhases(window.__phases);
+      });
+
+      document.getElementById("btnSave").addEventListener("click", () => {
+        try {
+          const data = collect();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          setStatus("保存成功，可打开预览页查看");
+        } catch (error) {
+          setStatus(`保存失败：${error.message}`, true);
+        }
+      });
+
+      document.getElementById("btnPreview").addEventListener("click", () => {
+        window.open("./project_review_template.html", "_blank");
+      });
+
+      document.getElementById("btnOpenJsonEditor").addEventListener("click", () => {
+        window.open("./project_review_template_editor.html", "_blank");
+      });
+
+      document.getElementById("btnReload").addEventListener("click", () => {
+        bind(loadConfig());
+        setStatus("已重新加载");
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
