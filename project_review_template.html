@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Review Template</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: rgba(255, 255, 255, 0.9);
+      --line: #bfd2ff;
+      --accent: #3366ff;
+      --accent-soft: rgba(51, 102, 255, 0.14);
+      --complete: #18a957;
+      --complete-soft: rgba(24, 169, 87, 0.16);
+      --progress: #7b4dff;
+      --progress-soft: rgba(123, 77, 255, 0.16);
+      --planned: #98a3b8;
+      --planned-soft: rgba(152, 163, 184, 0.18);
+      --delay: #f1c232;
+      --delay-soft: rgba(241, 194, 50, 0.2);
+      --text: #1b2a4a;
+      --muted: #60708f;
+      --shadow: 0 16px 42px rgba(39, 67, 120, 0.14);
+      --top-offset: 220px;
+      --bottom-offset: 56px;
+      --dot-size: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 45%, #ffffff 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 36px 24px 56px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid rgba(157, 175, 214, 0.7);
+      background: rgba(255,255,255,0.85);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .hero {
+      display: flex;
+      gap: 24px;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .hero__title h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.15;
+    }
+
+    .hero__title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      gap: 14px;
+      width: min(100%, 1320px);
+    }
+
+    .summary__card {
+      background: var(--card);
+      border: 1px solid rgba(155, 177, 225, 0.45);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .summary__label {
+      display: block;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .summary__value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .summary__points {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .summary__points li + li { margin-top: 4px; }
+
+    .summary__point--highlight { color: #c2410c; font-weight: 700; }
+
+    .summary__card--countdown {
+      background: linear-gradient(135deg, rgba(241, 194, 50, 0.12) 0%, rgba(123, 77, 255, 0.08) 100%);
+      border-color: rgba(191, 145, 25, 0.35);
+    }
+
+    .summary__countdown-value {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1;
+      color: #f1c232;
+      text-shadow: 0 2px 8px rgba(241, 194, 50, 0.2);
+    }
+
+    .summary__countdown-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .timeline-shell {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(182, 198, 231, 0.7);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 260px 24px 30px;
+      overflow-y: visible;
+      overflow-x: auto;
+    }
+
+    .timeline {
+      position: relative;
+      min-width: 1100px;
+      padding: 220px 140px 300px;
+    }
+
+    .timeline__track {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #dce6ff 0%, #c9d7ff 50%, #dce6ff 100%);
+      overflow: visible;
+    }
+
+    .timeline__axis {
+      position: absolute;
+      top: -20px;
+      bottom: -20px;
+      width: 1px;
+      background: rgba(117, 139, 184, 0.2);
+    }
+
+    .timeline__tick {
+      position: absolute;
+      top: 16px;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .phase-bar {
+      position: absolute;
+      top: -14px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(51, 102, 255, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      cursor: pointer;
+    }
+
+    .phase-bar--complete { background: linear-gradient(90deg, rgba(24, 169, 87, 0.22), rgba(24, 169, 87, 0.58)); }
+    .phase-bar--progress { background: linear-gradient(90deg, rgba(123, 77, 255, 0.22), rgba(123, 77, 255, 0.62)); }
+    .phase-bar--planned { background: linear-gradient(90deg, rgba(152, 163, 184, 0.22), rgba(152, 163, 184, 0.52)); }
+    .phase-bar--delayed { background: linear-gradient(90deg, rgba(123, 77, 255, 0.55) 0 50%, rgba(241, 194, 50, 0.8) 50% 100%); }
+
+    .phase-dot {
+      position: absolute;
+      top: 50%;
+      width: var(--dot-size);
+      height: var(--dot-size);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid var(--accent);
+      box-shadow: 0 0 0 8px rgba(51, 102, 255, 0.15);
+      z-index: 3;
+      cursor: pointer;
+    }
+
+    .phase-dot--complete { border-color: var(--complete); box-shadow: 0 0 0 8px var(--complete-soft); }
+    .phase-dot--progress { border-color: var(--progress); box-shadow: 0 0 0 8px var(--progress-soft); }
+    .phase-dot--planned { border-color: var(--planned); box-shadow: 0 0 0 8px var(--planned-soft); }
+    .phase-dot--delayed { border: none; background: linear-gradient(90deg, var(--progress) 0 50%, var(--delay) 50% 100%); }
+
+    .phase {
+      position: absolute;
+      width: min(240px, 24vw);
+      min-width: 190px;
+      transform: translateX(-50%);
+      z-index: 2;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .phase--top { bottom: calc(100% + var(--top-offset)); }
+    .phase--bottom { top: calc(100% + var(--bottom-offset)); }
+
+    .phase__connector {
+      position: absolute;
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(51, 102, 255, 0.45), rgba(51, 102, 255, 0.08));
+    }
+
+    .phase--top .phase__connector { top: calc(100% - 4px); height: var(--top-offset); }
+    .phase--bottom .phase__connector { bottom: calc(100% - 4px); height: var(--bottom-offset); }
+
+    .phase__card {
+      background: var(--card);
+      border: 1px solid rgba(159, 179, 225, 0.55);
+      border-radius: 20px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+    }
+
+    .phase__card--complete { border-color: rgba(24, 169, 87, 0.26); }
+    .phase__card--progress { border-color: rgba(123, 77, 255, 0.28); }
+    .phase__card--planned { border-color: rgba(152, 163, 184, 0.35); }
+    .phase__card--delayed { border-color: rgba(191, 145, 25, 0.34); }
+
+    .phase__index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .phase__title { margin: 0 0 6px; font-size: 14px; line-height: 1.3; font-weight: 600; }
+    .phase__dates, .phase__duration, .phase__note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .phase__duration { margin-top: 4px; color: var(--accent); font-weight: 600; }
+    .phase__note { margin-top: 4px; }
+
+    .phase-bar.is-dimmed, .phase-dot.is-dimmed, .phase.is-dimmed { opacity: 0.34; }
+    .phase.is-active { transform: translateX(-50%) scale(1.03); z-index: 6; }
+    .phase-dot.is-active { transform: translate(-50%, -50%) scale(1.25); }
+    .phase-bar.is-active { transform: translateY(-4px); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 36px;
+    }
+
+    .legend__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(180, 196, 228, 0.7);
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .legend__chip::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(51, 102, 255, 0.15);
+    }
+
+    .legend__chip--complete::before { background: var(--complete); box-shadow: 0 0 0 6px var(--complete-soft); }
+    .legend__chip--progress::before { background: var(--progress); box-shadow: 0 0 0 6px var(--progress-soft); }
+    .legend__chip--planned::before { background: var(--planned); box-shadow: 0 0 0 6px var(--planned-soft); }
+    .legend__chip--delayed::before { background: linear-gradient(90deg, var(--progress) 0 50%, var(--delay) 50% 100%); }
+
+    .task-detail {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(176, 194, 230, 0.7);
+      background: rgba(255,255,255,0.78);
+    }
+
+    .task-detail__title { margin: 0 0 10px; font-size: 20px; }
+    .task-detail__meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .task-detail__chip { padding: 6px 10px; font-size: 12px; border-radius: 999px; background: rgba(92,120,196,0.1); color: #44527a; }
+    .task-detail__description { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .delay-plan {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(191, 145, 25, 0.3);
+      background: linear-gradient(90deg, rgba(123, 77, 255, 0.08) 0 50%, rgba(241, 194, 50, 0.12) 50% 100%);
+    }
+
+    .delay-plan h3 { margin: 0 0 10px; font-size: 16px; }
+    .delay-plan__section { margin-bottom: 14px; }
+    .delay-plan__section-title { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+    .delay-plan__list, .delay-plan__section-list { margin: 0; padding-left: 20px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    @media (max-width: 900px) {
+      .summary { grid-template-columns: 1fr; width: 100%; }
+      .timeline { min-width: 980px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="toolbar">
+      <button class="btn" id="btnReload">重新加载配置</button>
+      <button class="btn" id="btnOpenEditor">打开编辑器</button>
+    </div>
+
+    <header class="hero">
+      <div class="hero__title">
+        <h1 id="projectTitle"></h1>
+        <p id="projectSubtitle"></p>
+      </div>
+      <div class="summary" id="summary"></div>
+    </header>
+
+    <section class="timeline-shell">
+      <div class="timeline" id="timeline">
+        <div class="timeline__track" id="timelineTrack"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="task-detail" id="taskDetail"></div>
+      <div class="delay-plan" id="delayCompPlan"></div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "projectReviewTemplateConfig";
+
+    const defaultConfig = {
+      meta: {
+        projectTitle: "Project Execution Timeline",
+        subtitle: "可复用项目回顾模板（支持编辑器改字）",
+        scheduleYear: 2026,
+        deadline: { month: 6, day: 30, label: "6.30截止倒计时" },
+        footer: "点击任务节点可高亮并查看详情"
+      },
+      summary: {
+        labels: {
+          mainInfo: "主要信息",
+          stages: "项目阶段",
+          totalDuration: "总周期",
+          statusStats: "状态统计",
+          countdown: "6.30截止倒计时"
+        },
+        mainInfoPoints: [
+          "费用影响：无",
+          "业务影响：无",
+          "CPS影响：可按项目定义替换"
+        ],
+        currentStageText: "当前阶段：按项目更新",
+        countdownHint: "距离截止日期还有"
+      },
+      legend: [
+        { text: "绿色：已完成", type: "complete" },
+        { text: "紫色：进行中", type: "progress" },
+        { text: "灰色：计划阶段", type: "planned" },
+        { text: "紫黄各半：延期阶段", type: "delayed" }
+      ],
+      delaySection: {
+        title: "延期原因与补偿计划",
+        sections: [
+          {
+            title: "Challenge:",
+            mode: "text",
+            text: "在此填写挑战描述。"
+          },
+          {
+            title: "Root Cause:",
+            mode: "ul",
+            items: ["根因1", "根因2"]
+          },
+          {
+            title: "Mitigation Plan:",
+            mode: "ol",
+            items: ["措施1", "措施2"]
+          }
+        ]
+      },
+      phases: [
+        {
+          title: "Phase 1",
+          planStart: "2026-04-13",
+          planEnd: "2026-04-15",
+          start: "2026-04-13",
+          end: "2026-04-15",
+          statusLabel: "按期完成",
+          visualStatus: "complete",
+          note: ""
+        },
+        {
+          title: "Phase 2",
+          planStart: "2026-04-16",
+          planEnd: "2026-04-25",
+          start: "2026-04-16",
+          end: "2026-04-25",
+          statusLabel: "进行中",
+          visualStatus: "progress",
+          note: ""
+        },
+        {
+          title: "Phase 3",
+          planStart: "2026-04-26",
+          planEnd: "2026-05-05",
+          start: "2026-04-26",
+          end: "2026-05-08",
+          statusLabel: "延迟",
+          visualStatus: "delayed",
+          blocker: "等待依赖项",
+          note: ""
+        },
+        {
+          title: "Phase 4",
+          planStart: "2026-05-09",
+          planEnd: "2026-06-10",
+          start: "2026-05-09",
+          end: "2026-06-10",
+          statusLabel: "TBD",
+          visualStatus: "planned",
+          blocker: "待资源确认",
+          note: ""
+        }
+      ]
+    };
+
+    function deepClone(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function loadConfig() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return deepClone(defaultConfig);
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed;
+      } catch {
+        return deepClone(defaultConfig);
+      }
+    }
+
+    function toDate(dateStr) {
+      return new Date(`${dateStr}T00:00:00`);
+    }
+
+    function inclusiveDuration(start, end) {
+      const dayMs = 24 * 60 * 60 * 1000;
+      return Math.round((toDate(end) - toDate(start)) / dayMs) + 1;
+    }
+
+    function createPhaseLabel(status) {
+      const map = {
+        complete: "已完成",
+        progress: "进行中",
+        planned: "计划阶段",
+        delayed: "延期阶段"
+      };
+      return map[status] || status;
+    }
+
+    function render() {
+      const config = loadConfig();
+      const phases = config.phases || [];
+      if (!phases.length) return;
+
+      const projectTitle = document.getElementById("projectTitle");
+      const projectSubtitle = document.getElementById("projectSubtitle");
+      const summary = document.getElementById("summary");
+      const timeline = document.getElementById("timeline");
+      const track = document.getElementById("timelineTrack");
+      const legend = document.getElementById("legend");
+      const taskDetail = document.getElementById("taskDetail");
+      const delayCompPlan = document.getElementById("delayCompPlan");
+
+      projectTitle.textContent = config.meta.projectTitle;
+      projectSubtitle.textContent = config.meta.subtitle;
+
+      const dayMs = 24 * 60 * 60 * 1000;
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const startDates = phases.map((p) => toDate(p.start));
+      const endDates = phases.map((p) => toDate(p.end));
+      const timelineStart = new Date(Math.min(...startDates));
+      const timelineEnd = new Date(Math.max(...endDates));
+      const totalDays = Math.round((timelineEnd - timelineStart) / dayMs) + 1;
+
+      const dateFormatter = new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric" });
+
+      const getDayOffset = (dateString) => Math.round((toDate(dateString) - timelineStart) / dayMs);
+      const toPercent = (offset) => (totalDays <= 1 ? 0 : (offset / (totalDays - 1)) * 100);
+      const getDelayInfo = (phase) => {
+        if (phase.statusLabel === "按期完成") return { showDelay: false, delayDays: 0 };
+        const delayDays = Math.max(0, Math.round((todayStart - toDate(phase.planEnd)) / dayMs));
+        return { showDelay: delayDays > 0, delayDays };
+      };
+
+      const statusCounts = phases.reduce(
+        (acc, p) => {
+          acc[p.statusLabel] = (acc[p.statusLabel] || 0) + 1;
+          return acc;
+        },
+        { "按期完成": 0, "延迟": 0, "TBD": 0 }
+      );
+
+      const deadline = new Date(config.meta.scheduleYear, config.meta.deadline.month - 1, config.meta.deadline.day);
+      const countdownDays = Math.max(0, Math.ceil((deadline - todayStart) / dayMs));
+
+      summary.innerHTML = "";
+      const cards = [
+        {
+          label: config.summary.labels.mainInfo,
+          points: config.summary.mainInfoPoints
+        },
+        {
+          label: config.summary.labels.stages,
+          points: [`总阶段：${phases.length}`, config.summary.currentStageText]
+        },
+        {
+          label: config.summary.labels.totalDuration,
+          value: `${totalDays}天`
+        },
+        {
+          label: config.summary.labels.statusStats,
+          points: [
+            `按期完成：${statusCounts["按期完成"] || 0}`,
+            `延迟：${statusCounts["延迟"] || 0}`,
+            `TBD：${statusCounts["TBD"] || 0}`
+          ]
+        }
+      ];
+
+      cards.forEach((card, cardIndex) => {
+        const div = document.createElement("div");
+        div.className = "summary__card";
+        div.innerHTML = `
+          <span class="summary__label">${card.label}</span>
+          ${card.points
+            ? `<ol class="summary__points">${card.points
+                .map((p, idx) => `<li class="${cardIndex === 1 && idx === 1 ? "summary__point--highlight" : ""}">${p}</li>`)
+                .join("")}</ol>`
+            : `<div class="summary__value">${card.value}</div>`}
+        `;
+        summary.appendChild(div);
+      });
+
+      const countdownCard = document.createElement("div");
+      countdownCard.className = "summary__card summary__card--countdown";
+      countdownCard.innerHTML = `
+        <span class="summary__label">${config.summary.labels.countdown}</span>
+        <div class="summary__countdown-value">${countdownDays}</div>
+        <div class="summary__countdown-label">${config.summary.countdownHint}</div>
+      `;
+      summary.appendChild(countdownCard);
+
+      track.innerHTML = "";
+      legend.innerHTML = "";
+      taskDetail.innerHTML = "";
+      delayCompPlan.innerHTML = "";
+
+      const phaseElements = [];
+
+      const tickStep = totalDays > 40 ? 5 : 3;
+      for (let day = 0; day < totalDays; day += tickStep) {
+        const tickDate = new Date(timelineStart.getTime() + day * dayMs);
+        const axis = document.createElement("div");
+        axis.className = "timeline__axis";
+        axis.style.left = `${toPercent(day)}%`;
+
+        const label = document.createElement("div");
+        label.className = "timeline__tick";
+        label.style.left = `${toPercent(day)}%`;
+        label.textContent = dateFormatter.format(tickDate);
+
+        track.appendChild(axis);
+        track.appendChild(label);
+      }
+
+      phases.forEach((phase, index) => {
+        const startOffset = getDayOffset(phase.start);
+        const endOffset = getDayOffset(phase.end);
+        const midOffset = startOffset + (endOffset - startOffset) / 2;
+        const isTop = index % 2 === 0;
+        const duration = inclusiveDuration(phase.start, phase.end);
+        const planStartLabel = dateFormatter.format(toDate(phase.planStart));
+        const planEndLabel = dateFormatter.format(toDate(phase.planEnd));
+        const startLabel = dateFormatter.format(toDate(phase.start));
+        const endLabel = dateFormatter.format(toDate(phase.end));
+        const status = phase.visualStatus || "planned";
+        const delayInfo = getDelayInfo(phase);
+
+        const bar = document.createElement("div");
+        bar.className = `phase-bar phase-bar--${status}`;
+        bar.style.left = `${toPercent(startOffset)}%`;
+        bar.style.width = `${Math.max(toPercent(endOffset) - toPercent(startOffset), 1.5)}%`;
+
+        const dot = document.createElement("div");
+        dot.className = `phase-dot phase-dot--${status}`;
+        dot.style.left = `${toPercent(midOffset)}%`;
+
+        const node = document.createElement("article");
+        node.className = `phase ${isTop ? "phase--top" : "phase--bottom"}`;
+        node.style.left = `${toPercent(midOffset)}%`;
+        node.innerHTML = `
+          <div class="phase__card phase__card--${status}">
+            <div class="phase__index">${index + 1}</div>
+            <h3 class="phase__title">${phase.title}</h3>
+            <p class="phase__dates">计划时间：${planStartLabel} - ${planEndLabel}</p>
+            <p class="phase__dates">当前时间：${startLabel} - ${endLabel}</p>
+            <p class="phase__duration">Duration: ${duration} days</p>
+            <p class="phase__note">状态：${phase.statusLabel}</p>
+            ${phase.blocker ? `<p class="phase__note">说明：${phase.blocker}</p>` : ""}
+            ${delayInfo.showDelay ? `<p class="phase__note">延期时间：${delayInfo.delayDays}天</p>` : ""}
+            ${phase.note ? `<p class="phase__note">${phase.note}</p>` : ""}
+          </div>
+          <div class="phase__connector"></div>
+        `;
+
+        track.appendChild(bar);
+        track.appendChild(dot);
+        track.appendChild(node);
+
+        phaseElements.push({ bar, dot, node, phase, index, status, duration, planStartLabel, planEndLabel, startLabel, endLabel, delayInfo });
+      });
+
+      const renderTaskDetail = (item) => {
+        taskDetail.innerHTML = `
+          <h2 class="task-detail__title">${item.index + 1}. ${item.phase.title}</h2>
+          <div class="task-detail__meta">
+            <div class="task-detail__chip">状态：${item.phase.statusLabel}</div>
+            <div class="task-detail__chip">计划：${item.planStartLabel} - ${item.planEndLabel}</div>
+            <div class="task-detail__chip">当前：${item.startLabel} - ${item.endLabel}</div>
+            <div class="task-detail__chip">周期：${item.duration}天</div>
+            ${item.delayInfo.showDelay ? `<div class="task-detail__chip">延期：${item.delayInfo.delayDays}天</div>` : ""}
+          </div>
+          <p class="task-detail__description">${item.phase.blocker || item.phase.note || config.meta.footer || "点击其他阶段查看详情"}</p>
+        `;
+      };
+
+      const setActivePhase = (activeIndex) => {
+        phaseElements.forEach((item, idx) => {
+          const active = idx === activeIndex;
+          item.bar.classList.toggle("is-active", active);
+          item.dot.classList.toggle("is-active", active);
+          item.node.classList.toggle("is-active", active);
+          item.bar.classList.toggle("is-dimmed", !active);
+          item.dot.classList.toggle("is-dimmed", !active);
+          item.node.classList.toggle("is-dimmed", !active);
+        });
+        renderTaskDetail(phaseElements[activeIndex]);
+      };
+
+      phaseElements.forEach((item, idx) => {
+        const click = () => setActivePhase(idx);
+        item.bar.addEventListener("click", click);
+        item.dot.addEventListener("click", click);
+        item.node.addEventListener("click", click);
+      });
+
+      setActivePhase(0);
+
+      (config.legend || []).forEach((item) => {
+        const chip = document.createElement("div");
+        chip.className = `legend__chip ${item.type ? `legend__chip--${item.type}` : ""}`;
+        chip.textContent = item.text;
+        legend.appendChild(chip);
+      });
+
+      delayCompPlan.innerHTML = `<h3>${config.delaySection.title}</h3>`;
+      (config.delaySection.sections || []).forEach((sec) => {
+        const section = document.createElement("div");
+        section.className = "delay-plan__section";
+        let bodyHtml = "";
+        if (sec.mode === "text") {
+          bodyHtml = `<p class="delay-plan__section-list" style="padding-left:0;list-style:none;">${sec.text || ""}</p>`;
+        } else if (sec.mode === "ul") {
+          bodyHtml = `<ul class="delay-plan__section-list">${(sec.items || []).map((i) => `<li>${i}</li>`).join("")}</ul>`;
+        } else {
+          bodyHtml = `<ol class="delay-plan__list">${(sec.items || []).map((i) => `<li>${i}</li>`).join("")}</ol>`;
+        }
+
+        section.innerHTML = `
+          <div class="delay-plan__section-title">${sec.title}</div>
+          ${bodyHtml}
+        `;
+        delayCompPlan.appendChild(section);
+      });
+    }
+
+    document.getElementById("btnReload").addEventListener("click", render);
+    document.getElementById("btnOpenEditor").addEventListener("click", () => {
+      window.open("./project_review_template_editor.html", "_blank");
+    });
+
+    render();
+  </script>
+</body>
+</html>

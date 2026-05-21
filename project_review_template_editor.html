@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Editor</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1b2a4a;
+      --muted: #60708f;
+      --line: #dbe3f6;
+      --accent: #3366ff;
+      --shadow: 0 14px 30px rgba(33, 61, 120, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 55%, #ffffff 100%);
+    }
+
+    .wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 70vh;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #24345b;
+      background: #fbfcff;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    button, .file-btn {
+      width: 100%;
+      border: 1px solid #b9c7ea;
+      background: #fff;
+      color: #1b2a4a;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      min-height: 18px;
+    }
+
+    .path {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .wrap { grid-template-columns: 1fr; }
+      textarea { min-height: 56vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <h1>项目回顾模板编辑器</h1>
+      <p class="hint">
+        这里可直接改所有文字、阶段、日期、标签。保存后打开预览页即可复用到任何项目。
+        建议只改值，不改字段名。
+      </p>
+      <textarea id="jsonEditor"></textarea>
+    </section>
+
+    <aside class="panel">
+      <div class="actions">
+        <button class="primary" id="btnSave">保存到模板</button>
+        <button id="btnPreview">打开预览页</button>
+        <button id="btnFormat">格式化JSON</button>
+        <button id="btnLoadDefault">恢复默认模板</button>
+        <button id="btnExport">导出JSON</button>
+        <label class="file-btn" for="importFile">导入JSON</label>
+        <input class="file-input" id="importFile" type="file" accept="application/json" />
+      </div>
+      <div class="status" id="status"></div>
+      <div class="path">
+        预览页：project_review_template.html
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "projectReviewTemplateConfig";
+
+    const defaultConfig = {
+      meta: {
+        projectTitle: "Project Execution Timeline",
+        subtitle: "可复用项目回顾模板（支持编辑器改字）",
+        scheduleYear: 2026,
+        deadline: { month: 6, day: 30, label: "6.30截止倒计时" },
+        footer: "点击任务节点可高亮并查看详情"
+      },
+      summary: {
+        labels: {
+          mainInfo: "主要信息",
+          stages: "项目阶段",
+          totalDuration: "总周期",
+          statusStats: "状态统计",
+          countdown: "6.30截止倒计时"
+        },
+        mainInfoPoints: [
+          "费用影响：无",
+          "业务影响：无",
+          "CPS影响：可按项目定义替换"
+        ],
+        currentStageText: "当前阶段：按项目更新",
+        countdownHint: "距离截止日期还有"
+      },
+      legend: [
+        { text: "绿色：已完成", type: "complete" },
+        { text: "紫色：进行中", type: "progress" },
+        { text: "灰色：计划阶段", type: "planned" },
+        { text: "紫黄各半：延期阶段", type: "delayed" }
+      ],
+      delaySection: {
+        title: "延期原因与补偿计划",
+        sections: [
+          { title: "Challenge:", mode: "text", text: "在此填写挑战描述。" },
+          { title: "Root Cause:", mode: "ul", items: ["根因1", "根因2"] },
+          { title: "Mitigation Plan:", mode: "ol", items: ["措施1", "措施2"] }
+        ]
+      },
+      phases: [
+        {
+          title: "Phase 1",
+          planStart: "2026-04-13",
+          planEnd: "2026-04-15",
+          start: "2026-04-13",
+          end: "2026-04-15",
+          statusLabel: "按期完成",
+          visualStatus: "complete",
+          note: ""
+        },
+        {
+          title: "Phase 2",
+          planStart: "2026-04-16",
+          planEnd: "2026-04-25",
+          start: "2026-04-16",
+          end: "2026-04-25",
+          statusLabel: "进行中",
+          visualStatus: "progress",
+          note: ""
+        }
+      ]
+    };
+
+    function setStatus(text, isError = false) {
+      const el = document.getElementById("status");
+      el.style.color = isError ? "#b91c1c" : "#60708f";
+      el.textContent = text;
+    }
+
+    function parseEditorJson() {
+      const raw = document.getElementById("jsonEditor").value;
+      return JSON.parse(raw);
+    }
+
+    function loadIntoEditor() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw ? JSON.parse(raw) : defaultConfig;
+      document.getElementById("jsonEditor").value = JSON.stringify(data, null, 2);
+      setStatus("已加载配置");
+    }
+
+    document.getElementById("btnSave").addEventListener("click", () => {
+      try {
+        const data = parseEditorJson();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setStatus("保存成功，可打开预览页查看。", false);
+      } catch (error) {
+        setStatus(`JSON格式错误：${error.message}`, true);
+      }
+    });
+
+    document.getElementById("btnPreview").addEventListener("click", () => {
+      window.open("./project_review_template.html", "_blank");
+    });
+
+    document.getElementById("btnFormat").addEventListener("click", () => {
+      try {
+        const data = parseEditorJson();
+        document.getElementById("jsonEditor").value = JSON.stringify(data, null, 2);
+        setStatus("JSON已格式化");
+      } catch (error) {
+        setStatus(`JSON格式错误：${error.message}`, true);
+      }
+    });
+
+    document.getElementById("btnLoadDefault").addEventListener("click", () => {
+      document.getElementById("jsonEditor").value = JSON.stringify(defaultConfig, null, 2);
+      setStatus("已恢复默认模板，点击“保存到模板”生效");
+    });
+
+    document.getElementById("btnExport").addEventListener("click", () => {
+      try {
+        const data = parseEditorJson();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "project_review_template_config.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        setStatus("已导出JSON文件");
+      } catch (error) {
+        setStatus(`导出失败：${error.message}`, true);
+      }
+    });
+
+    document.getElementById("importFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        document.getElementById("jsonEditor").value = JSON.stringify(data, null, 2);
+        setStatus("导入成功，点击“保存到模板”生效");
+      } catch (error) {
+        setStatus(`导入失败：${error.message}`, true);
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    loadIntoEditor();
+  </script>
+</body>
+</html>
