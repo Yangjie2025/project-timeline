@@ -68,9 +68,9 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
       gap: 14px;
-      width: min(100%, 1240px);
+      width: min(100%, 1300px);
     }
 
     .summary__card {
@@ -120,6 +120,31 @@
     .summary__point--highlight {
       color: #c2410c;
       font-weight: 700;
+    }
+
+    .summary__card--countdown {
+      background: linear-gradient(135deg, rgba(241, 194, 50, 0.12) 0%, rgba(123, 77, 255, 0.08) 100%);
+      border-color: rgba(191, 145, 25, 0.35);
+      position: relative;
+    }
+
+    .summary__card--countdown .summary__label {
+      color: #856100;
+      font-weight: 600;
+    }
+
+    .summary__countdown-value {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1;
+      color: #f1c232;
+      text-shadow: 0 2px 8px rgba(241, 194, 50, 0.2);
+    }
+
+    .summary__countdown-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
     }
 
     .timeline-shell {
@@ -640,8 +665,7 @@
           <ol class="delay-plan__section-list">
             <li>PE 版本问题</li>
             <li>新版本PE存在字段缺失问题需要联系Proficy product team 一起纠错导致时间耽误</li>
-            <li>CPS预期无任何Buffer</li>
-          </ol>
+                   </ol>
         </div>
         <div class="delay-plan__section">
           <div class="delay-plan__section-title">补偿方案：</div>
@@ -809,6 +833,10 @@
         { "按期完成": 0, "延迟": 0, "TBD": 0 }
       );
 
+      // 计算倒计时（距离6月30号还有多少天）
+      const deadlineDate = new Date(scheduleYear, 5, 30); // 6月30号（月份从0开始）
+      const countdownDays = Math.ceil((deadlineDate - todayStart) / dayMs);
+
       const cards = [
         {
           label: "主要信息",
@@ -868,6 +896,31 @@
           `
         )
         .join("");
+
+      // 添加倒计时卡片
+      const countdownCard = document.createElement("div");
+      countdownCard.className = "summary__card summary__card--countdown";
+      countdownCard.innerHTML = `
+        <span class="summary__label">6.30截止倒计时</span>
+        <div class="summary__countdown-value" id="countdownValue">${Math.max(0, countdownDays)}</div>
+        <div class="summary__countdown-label">距离截止日期还有</div>
+      `;
+      summary.appendChild(countdownCard);
+
+      // 更新倒计时（每小时检查一次是否需要更新）
+      function updateCountdown() {
+        const deadlineDate = new Date(scheduleYear, 5, 30);
+        const now = new Date();
+        const todayCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const daysRemaining = Math.ceil((deadlineDate - todayCheck) / dayMs);
+        const countdownValueEl = document.getElementById("countdownValue");
+        if (countdownValueEl) {
+          countdownValueEl.textContent = Math.max(0, daysRemaining);
+        }
+      }
+      updateCountdown();
+      // 每小时检查一次是否需要更新（确保跨越午夜时会更新）
+      setInterval(updateCountdown, 3600000);
     }
 
     function renderTicks() {
