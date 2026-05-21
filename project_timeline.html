@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Timeline</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: rgba(255, 255, 255, 0.9);
+      --line: #bfd2ff;
+      --accent: #3366ff;
+      --accent-soft: rgba(51, 102, 255, 0.14);
+      --complete: #18a957;
+      --complete-soft: rgba(24, 169, 87, 0.16);
+      --progress: #7b4dff;
+      --progress-soft: rgba(123, 77, 255, 0.16);
+      --planned: #98a3b8;
+      --planned-soft: rgba(152, 163, 184, 0.18);
+      --delay: #f1c232;
+      --delay-soft: rgba(241, 194, 50, 0.2);
+      --text: #1b2a4a;
+      --muted: #60708f;
+      --shadow: 0 16px 42px rgba(39, 67, 120, 0.14);
+      --top-offset: 56px;
+      --bottom-offset: 56px;
+      --dot-size: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 45%, #ffffff 100%);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+    }
+
+    .hero {
+      display: flex;
+      gap: 24px;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .hero__title h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.15;
+    }
+
+    .hero__title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 14px;
+      width: min(100%, 1240px);
+    }
+
+    .summary__card {
+      background: var(--card);
+      border: 1px solid rgba(155, 177, 225, 0.45);
+      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 18px 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .summary__label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .summary__value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .summary__points {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .summary__points li + li {
+      margin-top: 4px;
+    }
+
+    .summary__point--highlight {
+      color: #c2410c;
+      font-weight: 700;
+    }
+
+    .timeline-shell {
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(182, 198, 231, 0.7);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 26px 24px 30px;
+      overflow-x: auto;
+    }
+
+    .timeline {
+      position: relative;
+      min-width: 1100px;
+      padding: 220px 140px 320px;
+    }
+
+    .timeline__track {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #dce6ff 0%, #c9d7ff 50%, #dce6ff 100%);
+      overflow: visible;
+    }
+
+    .timeline__axis {
+      position: absolute;
+      top: -22px;
+      bottom: -22px;
+      width: 1px;
+      background: rgba(117, 139, 184, 0.2);
+    }
+
+    .timeline__tick {
+      position: absolute;
+      top: 18px;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .phase-bar {
+      position: absolute;
+      top: -14px;
+      height: 34px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(80, 122, 255, 0.2), rgba(51, 102, 255, 0.5));
+      border: 1px solid rgba(51, 102, 255, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+    }
+
+    .phase-bar--complete {
+      background: linear-gradient(90deg, rgba(24, 169, 87, 0.22), rgba(24, 169, 87, 0.58));
+      border-color: rgba(24, 169, 87, 0.3);
+    }
+
+    .phase-bar--progress {
+      background: linear-gradient(90deg, rgba(123, 77, 255, 0.22), rgba(123, 77, 255, 0.62));
+      border-color: rgba(123, 77, 255, 0.28);
+    }
+
+    .phase-bar--planned {
+      background: linear-gradient(90deg, rgba(152, 163, 184, 0.22), rgba(152, 163, 184, 0.52));
+      border-color: rgba(152, 163, 184, 0.3);
+    }
+
+    .phase-bar--delayed {
+      background: linear-gradient(90deg, rgba(123, 77, 255, 0.55) 0 50%, rgba(241, 194, 50, 0.8) 50% 100%);
+      border-color: rgba(191, 145, 25, 0.35);
+    }
+
+    .phase-dot {
+      position: absolute;
+      top: 50%;
+      width: var(--dot-size);
+      height: var(--dot-size);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #ffffff;
+      border: 4px solid var(--accent);
+      box-shadow: 0 0 0 8px rgba(51, 102, 255, 0.15);
+      z-index: 3;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
+    }
+
+    .phase-dot--complete {
+      border-color: var(--complete);
+      box-shadow: 0 0 0 8px var(--complete-soft);
+    }
+
+    .phase-dot--progress {
+      border-color: var(--progress);
+      box-shadow: 0 0 0 8px var(--progress-soft);
+    }
+
+    .phase-dot--planned {
+      border-color: var(--planned);
+      box-shadow: 0 0 0 8px var(--planned-soft);
+    }
+
+    .phase-dot--delayed {
+      border: none;
+      background: linear-gradient(90deg, var(--progress) 0 50%, var(--delay) 50% 100%);
+      box-shadow: 0 0 0 8px rgba(182, 143, 44, 0.18);
+    }
+
+    .phase {
+      position: absolute;
+      width: min(220px, 20vw);
+      min-width: 180px;
+      transform: translateX(-50%);
+      z-index: 2;
+      transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .phase--top {
+      bottom: calc(100% + var(--top-offset));
+    }
+
+    .phase--bottom {
+      top: calc(100% + var(--bottom-offset));
+    }
+
+    .phase__connector {
+      position: absolute;
+      left: 50%;
+      width: 2px;
+      background: linear-gradient(180deg, rgba(51, 102, 255, 0.45), rgba(51, 102, 255, 0.08));
+      transform: translateX(-50%);
+    }
+
+    .phase--top .phase__connector {
+      top: calc(100% - 4px);
+      height: var(--top-offset);
+    }
+
+    .phase--bottom .phase__connector {
+      bottom: calc(100% - 4px);
+      height: var(--bottom-offset);
+    }
+
+    .phase__card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid rgba(159, 179, 225, 0.55);
+      border-radius: 20px;
+      padding: 16px 16px 14px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .phase__card--vendor {
+      background: rgba(123, 77, 255, 0.16);
+    }
+
+    .phase__card--site {
+      background: rgba(24, 169, 87, 0.16);
+    }
+
+    .phase__card--default {
+      background: var(--card);
+    }
+
+    .phase-bar.is-dimmed,
+    .phase-dot.is-dimmed,
+    .phase.is-dimmed {
+      opacity: 0.34;
+    }
+
+    .phase-bar.is-active {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(39, 67, 120, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      z-index: 4;
+    }
+
+    .phase-dot.is-active {
+      transform: translate(-50%, -50%) scale(1.28);
+      z-index: 5;
+    }
+
+    .phase.is-active {
+      transform: translateX(-50%) scale(1.03);
+      z-index: 5;
+    }
+
+    .phase.is-active .phase__card {
+      box-shadow: 0 22px 48px rgba(39, 67, 120, 0.22);
+      border-width: 2px;
+    }
+
+    .phase__card--complete {
+      border-color: rgba(24, 169, 87, 0.26);
+    }
+
+    .phase__card--progress {
+      border-color: rgba(123, 77, 255, 0.28);
+    }
+
+    .phase__card--planned {
+      border-color: rgba(152, 163, 184, 0.35);
+    }
+
+    .phase__card--delayed {
+      border-color: rgba(191, 145, 25, 0.34);
+    }
+
+    .phase__index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .phase__index--complete {
+      background: var(--complete-soft);
+      color: var(--complete);
+    }
+
+    .phase__index--progress {
+      background: var(--progress-soft);
+      color: var(--progress);
+    }
+
+    .phase__index--planned {
+      background: var(--planned-soft);
+      color: #647085;
+    }
+
+    .phase__index--delayed {
+      background: linear-gradient(90deg, var(--progress-soft) 0 50%, var(--delay-soft) 50% 100%);
+      color: #856100;
+    }
+
+    .phase__title {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .phase__dates,
+    .phase__duration,
+    .phase__note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .phase__duration {
+      margin-top: 6px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .phase__note {
+      margin-top: 8px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 40px;
+      position: relative;
+      z-index: 8;
+    }
+
+    .legend__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(180, 196, 228, 0.7);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .legend__chip::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(51, 102, 255, 0.15);
+    }
+
+    .legend__chip--complete::before {
+      background: var(--complete);
+      box-shadow: 0 0 0 6px var(--complete-soft);
+    }
+
+    .legend__chip--progress::before {
+      background: var(--progress);
+      box-shadow: 0 0 0 6px var(--progress-soft);
+    }
+
+    .legend__chip--planned::before {
+      background: var(--planned);
+      box-shadow: 0 0 0 6px var(--planned-soft);
+    }
+
+    .legend__chip--delayed::before {
+      background: linear-gradient(90deg, var(--progress) 0 50%, var(--delay) 50% 100%);
+      box-shadow: 0 0 0 6px rgba(182, 143, 44, 0.18);
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .task-detail {
+      margin-top: 20px;
+      padding: 20px 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(180, 196, 228, 0.7);
+      box-shadow: var(--shadow);
+    }
+
+    .task-detail__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      background: rgba(51, 102, 255, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .task-detail__label::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .task-detail__label--complete {
+      background: var(--complete-soft);
+      color: var(--complete);
+    }
+
+    .task-detail__label--complete::before {
+      background: var(--complete);
+    }
+
+    .task-detail__label--progress {
+      background: var(--progress-soft);
+      color: var(--progress);
+    }
+
+    .task-detail__label--progress::before {
+      background: var(--progress);
+    }
+
+    .task-detail__label--planned {
+      background: var(--planned-soft);
+      color: #647085;
+    }
+
+    .task-detail__label--planned::before {
+      background: var(--planned);
+    }
+
+    .task-detail__label--delayed {
+      background: linear-gradient(90deg, var(--progress-soft) 0 50%, var(--delay-soft) 50% 100%);
+      color: #856100;
+    }
+
+    .task-detail__label--delayed::before {
+      background: linear-gradient(90deg, var(--progress) 0 50%, var(--delay) 50% 100%);
+    }
+
+    .task-detail__title {
+      margin: 0 0 10px;
+      font-size: 22px;
+      line-height: 1.3;
+    }
+
+    .task-detail__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .task-detail__chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      background: rgba(237, 242, 255, 0.95);
+    }
+
+    .task-detail__description {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .delay-link {
+      color: #6d44ff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .delay-link:hover {
+      text-decoration: underline;
+    }
+
+    .delay-plan {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(191, 145, 25, 0.3);
+      background: linear-gradient(90deg, rgba(123, 77, 255, 0.08) 0 50%, rgba(241, 194, 50, 0.12) 50% 100%);
+    }
+
+    .delay-plan h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    .delay-plan__list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .delay-plan__list li + li {
+      margin-top: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .summary {
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .timeline {
+        min-width: 980px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="hero__title">
+        <h1>Proficy Project Review with LTs </h1>
+        <p></p>
+      </div>
+      <div class="summary" id="summary"></div>
+    </section>
+
+    <section class="timeline-shell">
+      <div class="timeline" id="timeline">
+        <div class="timeline__track" id="timelineTrack"></div>
+      </div>
+      <div class="legend">
+        <div class="legend__chip legend__chip--complete">绿色：已完成</div>
+        <div class="legend__chip legend__chip--progress">紫色：进行中</div>
+        <div class="legend__chip legend__chip--planned">灰色：计划阶段</div>
+        <div class="legend__chip legend__chip--delayed">紫黄各半：延期阶段（5月8日-5月18日）</div>
+        <div class="legend__chip">Pilot lines: 3 条</div>
+        <div class="legend__chip">Roll out lines: 8 条</div>
+      </div>
+      <div class="footer-note"></div>
+      <div class="task-detail" id="taskDetail"></div>
+      <div class="delay-plan" id="delayCompPlan">
+        <h3>延期补偿计划</h3>
+        <ol class="delay-plan__list">
+          <li>保CL/PQ，力争于FY2526完成Pilot lines 的cut over 和 roll out。</li>
+          <li>持续解决PE问题，先回滚PE使用SV完成CL/PQ，后续根据PE稳定性评估再决定是否恢复PE以及何时上线。</li>
+          <li>2026.07完成PE上线，并完成所有pilot lines的roll out；2026.09完成所有lines的roll out。</li>
+        </ol>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const scheduleYear = 2026;
+    const currentProgressDate = `${scheduleYear}-05-03`;
+    const delayWindow = {
+      start: `${scheduleYear}-05-08`,
+      end: `${scheduleYear}-05-18`
+    };
+
+    const phases = [
+      {
+        title: "BRL on site & Study Business need",
+        start: `${scheduleYear}-04-13`,
+        end: `${scheduleYear}-04-15`
+      },
+      {
+        title: "Site prepare CDW and closed gap",
+        start: `${scheduleYear}-04-16`,
+        end: `${scheduleYear}-04-25`
+      },
+      {
+        title: "Vendor complete configuration",
+        start: `${scheduleYear}-04-25`,
+        end: `${scheduleYear}-05-05`
+      },
+      {
+        title: "Vendor complete IQ and turn over to site SSO",
+        start: `${scheduleYear}-05-05`,
+        end: `${scheduleYear}-05-12`
+      },
+      {
+        title: "Site SSO complete OQ in TRN",
+        start: `${scheduleYear}-05-12`,
+        end: `${scheduleYear}-05-21`
+      },
+      {
+        title: "Cut over on pilot lines",
+        start: `${scheduleYear}-05-25`,
+        end: `${scheduleYear}-05-29`,
+        note: "Pilot lines: 3"
+      },
+      {
+        title: "Roll out solution to all lines",
+        start: `${scheduleYear}-06-01`,
+        end: `${scheduleYear}-06-25`,
+        note: "Roll out lines: 8"
+      }
+    ];
+
+    const timeline = document.getElementById("timeline");
+    const track = document.getElementById("timelineTrack");
+    const summary = document.getElementById("summary");
+    const taskDetail = document.getElementById("taskDetail");
+    const phaseElements = [];
+
+    const dayMs = 24 * 60 * 60 * 1000;
+    const startDates = phases.map((phase) => new Date(`${phase.start}T00:00:00`));
+    const endDates = phases.map((phase) => new Date(`${phase.end}T00:00:00`));
+    const timelineStart = new Date(Math.min(...startDates));
+    const timelineEnd = new Date(Math.max(...endDates));
+    const totalDays = Math.round((timelineEnd - timelineStart) / dayMs) + 1;
+    const totalWeeks = Math.ceil(totalDays / 7);
+
+    const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
+      month: "short",
+      day: "numeric"
+    });
+
+    const statusTextMap = {
+      complete: "已完成",
+      progress: "进行中",
+      planned: "计划阶段",
+      delayed: "延期阶段"
+    };
+
+    function getDayOffset(dateString) {
+      const date = new Date(`${dateString}T00:00:00`);
+      return Math.round((date - timelineStart) / dayMs);
+    }
+
+    function toPercent(dayOffset) {
+      if (totalDays <= 1) {
+        return 0;
+      }
+      return (dayOffset / (totalDays - 1)) * 100;
+    }
+
+    function inclusiveDuration(start, end) {
+      return Math.round((new Date(`${end}T00:00:00`) - new Date(`${start}T00:00:00`)) / dayMs) + 1;
+    }
+
+    function overlapsRange(startA, endA, startB, endB) {
+      const aStart = new Date(`${startA}T00:00:00`);
+      const aEnd = new Date(`${endA}T00:00:00`);
+      const bStart = new Date(`${startB}T00:00:00`);
+      const bEnd = new Date(`${endB}T00:00:00`);
+      return aStart <= bEnd && bStart <= aEnd;
+    }
+
+    function getPhaseStatus(phase) {
+      const current = new Date(`${currentProgressDate}T00:00:00`);
+      const start = new Date(`${phase.start}T00:00:00`);
+      const end = new Date(`${phase.end}T00:00:00`);
+
+      if (overlapsRange(phase.start, phase.end, delayWindow.start, delayWindow.end)) {
+        return "delayed";
+      }
+
+      if (end < current) {
+        return "complete";
+      }
+
+      if (start <= current && current <= end) {
+        return "progress";
+      }
+
+      return "planned";
+    }
+
+    function getDelayInfo(phase) {
+      if (!overlapsRange(phase.start, phase.end, delayWindow.start, delayWindow.end)) {
+        return { hasDelay: false };
+      }
+
+      const phaseStart = new Date(`${phase.start}T00:00:00`);
+      const phaseEnd = new Date(`${phase.end}T00:00:00`);
+      const windowStart = new Date(`${delayWindow.start}T00:00:00`);
+      const windowEnd = new Date(`${delayWindow.end}T00:00:00`);
+
+      const overlapStart = new Date(Math.max(phaseStart.getTime(), windowStart.getTime()));
+      const overlapEnd = new Date(Math.min(phaseEnd.getTime(), windowEnd.getTime()));
+      const delayDays = Math.round((overlapEnd - overlapStart) / dayMs) + 1;
+      const overlapStartLabel = dateFormatter.format(overlapStart);
+      const overlapEndLabel = dateFormatter.format(overlapEnd);
+
+      return {
+        hasDelay: true,
+        delayDays,
+        overlapStartLabel,
+        overlapEndLabel
+      };
+    }
+
+    function getTitleTheme(title) {
+      const normalizedTitle = title.toLowerCase();
+      if (normalizedTitle.includes("vendor")) {
+        return "vendor";
+      }
+      if (normalizedTitle.includes("site")) {
+        return "site";
+      }
+      return "default";
+    }
+
+    function renderSummary() {
+      const cards = [
+        {
+          label: "主要总结",
+          points: [
+            { text: "费用影响：无" },
+            { text: "业务影响：无" },
+            { text: "CPS影响：PE 202607交付，CL/PQ于FY2526交付", highlight: true }
+          ]
+        },
+        { label: "项目阶段", value: `${phases.length}` },
+        { label: "总周期", value: `${totalDays}天` },
+        { label: "覆盖周数", value: `${totalWeeks}周` }
+      ];
+
+      summary.innerHTML = cards
+        .map(
+          (card) => `
+            <div class="summary__card">
+              <span class="summary__label">${card.label}</span>
+              ${card.points
+                ? `<ol class="summary__points">${card.points
+                    .map((point) => `<li class="${point.highlight ? "summary__point--highlight" : ""}">${point.text}</li>`)
+                    .join("")}</ol>`
+                : `<div class="summary__value">${card.value}</div>`}
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function renderTicks() {
+      const tickStep = totalDays > 40 ? 5 : 3;
+      for (let day = 0; day < totalDays; day += tickStep) {
+        const tickDate = new Date(timelineStart.getTime() + day * dayMs);
+        const axis = document.createElement("div");
+        axis.className = "timeline__axis";
+        axis.style.left = `${toPercent(day)}%`;
+
+        const label = document.createElement("div");
+        label.className = "timeline__tick";
+        label.style.left = `${toPercent(day)}%`;
+        label.textContent = dateFormatter.format(tickDate);
+
+        track.appendChild(axis);
+        track.appendChild(label);
+      }
+    }
+
+    function renderPhases() {
+      phases.forEach((phase, index) => {
+        const startOffset = getDayOffset(phase.start);
+        const endOffset = getDayOffset(phase.end);
+        const midOffset = startOffset + (endOffset - startOffset) / 2;
+        const isTop = index % 2 === 0;
+        const duration = inclusiveDuration(phase.start, phase.end);
+        const startLabel = dateFormatter.format(new Date(`${phase.start}T00:00:00`));
+        const endLabel = dateFormatter.format(new Date(`${phase.end}T00:00:00`));
+        const status = getPhaseStatus(phase);
+        const titleTheme = getTitleTheme(phase.title);
+        const delayInfo = getDelayInfo(phase);
+
+        const bar = document.createElement("div");
+        bar.className = `phase-bar phase-bar--${status}`;
+        bar.style.left = `${toPercent(startOffset)}%`;
+        bar.style.width = `${Math.max(toPercent(endOffset) - toPercent(startOffset), 1.5)}%`;
+        bar.setAttribute("role", "button");
+        bar.setAttribute("tabindex", "0");
+        track.appendChild(bar);
+
+        const dot = document.createElement("div");
+        dot.className = `phase-dot phase-dot--${status}`;
+        dot.style.left = `${toPercent(midOffset)}%`;
+        dot.setAttribute("role", "button");
+        dot.setAttribute("tabindex", "0");
+        track.appendChild(dot);
+
+        const phaseNode = document.createElement("article");
+        phaseNode.className = `phase ${isTop ? "phase--top" : "phase--bottom"}`;
+        phaseNode.style.left = `${toPercent(midOffset)}%`;
+        phaseNode.setAttribute("role", "button");
+        phaseNode.setAttribute("tabindex", "0");
+        phaseNode.innerHTML = `
+          <div class="phase__card phase__card--${status} phase__card--${titleTheme}">
+            <div class="phase__index phase__index--${status}">${index + 1}</div>
+            <h3 class="phase__title">${phase.title}</h3>
+            <p class="phase__dates">${startLabel} - ${endLabel}</p>
+            <p class="phase__duration">Duration: ${duration} days</p>
+            <p class="phase__note">状态：${statusTextMap[status]}</p>
+            ${delayInfo.hasDelay ? `<p class="phase__note">延期时间：${delayInfo.overlapStartLabel} - ${delayInfo.overlapEndLabel}（${delayInfo.delayDays}天）</p>` : ""}
+            ${delayInfo.hasDelay ? `<p class="phase__note"><a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a></p>` : ""}
+            ${phase.note ? `<p class="phase__note">${phase.note}</p>` : ""}
+          </div>
+          <div class="phase__connector"></div>
+        `;
+
+        track.appendChild(phaseNode);
+
+        const activate = () => setActivePhase(index);
+        const activateOnKeydown = (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            activate();
+          }
+        };
+
+        [bar, dot, phaseNode].forEach((element) => {
+          element.addEventListener("click", activate);
+          element.addEventListener("keydown", activateOnKeydown);
+        });
+
+        phaseElements.push({
+          bar,
+          dot,
+          phaseNode,
+          phase,
+          index,
+          status,
+          delayInfo,
+          duration,
+          startLabel,
+          endLabel
+        });
+      });
+    }
+
+    function renderTaskDetail(phaseItem) {
+      const noteText = phaseItem.phase.note ? `${phaseItem.phase.note}；` : "";
+      const currentLabel = dateFormatter.format(new Date(`${currentProgressDate}T00:00:00`));
+
+      taskDetail.innerHTML = `
+        <div class="task-detail__label task-detail__label--${phaseItem.status}">${statusTextMap[phaseItem.status]}</div>
+        <h2 class="task-detail__title">${phaseItem.index + 1}. ${phaseItem.phase.title}</h2>
+        <div class="task-detail__meta">
+          <div class="task-detail__chip">时间：${phaseItem.startLabel} - ${phaseItem.endLabel}</div>
+          <div class="task-detail__chip">周期：${phaseItem.duration} 天</div>
+          <div class="task-detail__chip">当前节点：${currentLabel}</div>
+          ${phaseItem.delayInfo.hasDelay ? `<div class="task-detail__chip">延期时间：${phaseItem.delayInfo.overlapStartLabel} - ${phaseItem.delayInfo.overlapEndLabel}（${phaseItem.delayInfo.delayDays}天）</div>` : ""}
+        </div>
+        <p class="task-detail__description">${noteText}${phaseItem.delayInfo.hasDelay ? `<a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a>；` : ""}</p>
+      `;
+    }
+
+    function setActivePhase(activeIndex) {
+      phaseElements.forEach((item) => {
+        const isActive = item.index === activeIndex;
+        item.bar.classList.toggle("is-active", isActive);
+        item.dot.classList.toggle("is-active", isActive);
+        item.phaseNode.classList.toggle("is-active", isActive);
+        item.bar.classList.toggle("is-dimmed", !isActive);
+        item.dot.classList.toggle("is-dimmed", !isActive);
+        item.phaseNode.classList.toggle("is-dimmed", !isActive);
+      });
+
+      const activeItem = phaseElements.find((item) => item.index === activeIndex);
+      if (activeItem) {
+        renderTaskDetail(activeItem);
+      }
+    }
+
+    renderSummary();
+    renderTicks();
+    renderPhases();
+    setActivePhase(2);
+  </script>
+</body>
+</html>
