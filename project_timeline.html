@@ -22,7 +22,7 @@
       --text: #1b2a4a;
       --muted: #60708f;
       --shadow: 0 16px 42px rgba(39, 67, 120, 0.14);
-      --top-offset: 56px;
+      --top-offset: 180px;
       --bottom-offset: 56px;
       --dot-size: 18px;
     }
@@ -42,6 +42,7 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 40px 24px 56px;
+      overflow: visible;
     }
 
     .hero {
@@ -106,6 +107,16 @@
       margin-top: 4px;
     }
 
+    .summary__subpoints {
+      margin: 4px 0 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .summary__subpoints li + li {
+      margin-top: 3px;
+    }
+
     .summary__point--highlight {
       color: #c2410c;
       font-weight: 700;
@@ -116,14 +127,15 @@
       border: 1px solid rgba(182, 198, 231, 0.7);
       border-radius: 28px;
       box-shadow: var(--shadow);
-      padding: 26px 24px 30px;
+      padding: 220px 24px 30px;
+      overflow-y: visible;
       overflow-x: auto;
     }
 
     .timeline {
       position: relative;
       min-width: 1100px;
-      padding: 220px 140px 320px;
+      padding: 180px 140px 320px;
     }
 
     .timeline__track {
@@ -221,8 +233,8 @@
 
     .phase {
       position: absolute;
-      width: min(220px, 20vw);
-      min-width: 180px;
+      width: min(240px, 22vw);
+      min-width: 190px;
       transform: translateX(-50%);
       z-index: 2;
       transition: transform 0.22s ease, opacity 0.22s ease;
@@ -259,7 +271,7 @@
       background: var(--card);
       border: 1px solid rgba(159, 179, 225, 0.55);
       border-radius: 20px;
-      padding: 16px 16px 14px;
+      padding: 12px 14px 12px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
       cursor: pointer;
@@ -325,13 +337,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--accent-soft);
       color: var(--accent);
       font-weight: 700;
-      margin-bottom: 12px;
+      font-size: 14px;
+      margin-bottom: 8px;
     }
 
     .phase__index--complete {
@@ -355,9 +368,10 @@
     }
 
     .phase__title {
-      margin: 0 0 8px;
-      font-size: 16px;
-      line-height: 1.35;
+      margin: 0 0 6px;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 600;
     }
 
     .phase__dates,
@@ -365,18 +379,18 @@
     .phase__note {
       margin: 0;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .phase__duration {
-      margin-top: 6px;
+      margin-top: 4px;
       color: var(--accent);
       font-weight: 600;
     }
 
     .phase__note {
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
     .legend {
@@ -560,8 +574,27 @@
       line-height: 1.7;
     }
 
-    .delay-plan__list li + li {
-      margin-top: 6px;
+    .delay-plan__section {
+      margin-bottom: 16px;
+    }
+
+    .delay-plan__section-title {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .delay-plan__section-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .delay-plan__section-list li + li {
+      margin-top: 4px;
     }
 
     @media (max-width: 900px) {
@@ -594,7 +627,7 @@
         <div class="legend__chip legend__chip--complete">绿色：已完成</div>
         <div class="legend__chip legend__chip--progress">紫色：进行中</div>
         <div class="legend__chip legend__chip--planned">灰色：计划阶段</div>
-        <div class="legend__chip legend__chip--delayed">紫黄各半：延期阶段（5月8日-5月18日）</div>
+        <div class="legend__chip legend__chip--delayed">紫黄各半：延期阶段</div>
         <div class="legend__chip">Pilot lines: 3 条</div>
         <div class="legend__chip">Roll out lines: 8 条</div>
       </div>
@@ -602,60 +635,97 @@
       <div class="task-detail" id="taskDetail"></div>
       <div class="delay-plan" id="delayCompPlan">
         <h3>延期补偿计划</h3>
-        <ol class="delay-plan__list">
-          <li>保CL/PQ，力争于FY2526完成Pilot lines 的cut over 和 roll out。</li>
-          <li>持续解决PE问题，先回滚PE使用SV完成CL/PQ，后续根据PE稳定性评估再决定是否恢复PE以及何时上线。</li>
-          <li>2026.07完成PE上线，并完成所有pilot lines的roll out；2026.09完成所有lines的roll out。</li>
-        </ol>
+        <div class="delay-plan__section">
+          <div class="delay-plan__section-title">延期原因：</div>
+          <ol class="delay-plan__section-list">
+            <li>PE 版本问题</li>
+            <li>新版本PE存在字段缺失问题需要联系Proficy product team 一起纠错导致时间耽误</li>
+            <li>CPS预期无任何Buffer</li>
+          </ol>
+        </div>
+        <div class="delay-plan__section">
+          <div class="delay-plan__section-title">补偿方案：</div>
+          <ol class="delay-plan__list">
+            <li>保CL/PQ，力争于FY2526完成Pilot lines 的cut over 和 roll out。</li>
+            <li>持续解决PE问题，先回滚PE使用SV完成CL/PQ，后续根据PE稳定性评估再决定是否恢复PE以及何时上线。</li>
+            <li>2026.07完成PE上线，并完成所有pilot lines的roll out；2026.09完成所有lines的roll out。</li>
+          </ol>
+        </div>
       </div>
     </section>
   </div>
 
   <script>
     const scheduleYear = 2026;
-    const currentProgressDate = `${scheduleYear}-05-03`;
-    const delayWindow = {
-      start: `${scheduleYear}-05-08`,
-      end: `${scheduleYear}-05-18`
-    };
 
     const phases = [
       {
         title: "BRL on site & Study Business need",
+        planStart: `${scheduleYear}-04-13`,
+        planEnd: `${scheduleYear}-04-15`,
         start: `${scheduleYear}-04-13`,
-        end: `${scheduleYear}-04-15`
+        end: `${scheduleYear}-04-15`,
+        statusLabel: "按期完成",
+        visualStatus: "complete"
       },
       {
         title: "Site prepare CDW and closed gap",
+        planStart: `${scheduleYear}-04-16`,
+        planEnd: `${scheduleYear}-04-25`,
         start: `${scheduleYear}-04-16`,
-        end: `${scheduleYear}-04-25`
+        end: `${scheduleYear}-04-25`,
+        statusLabel: "按期完成",
+        visualStatus: "complete"
       },
       {
         title: "Vendor complete configuration",
+        planStart: `${scheduleYear}-04-25`,
+        planEnd: `${scheduleYear}-05-05`,
         start: `${scheduleYear}-04-25`,
-        end: `${scheduleYear}-05-05`
+        end: `${scheduleYear}-05-05`,
+        statusLabel: "延迟",
+        visualStatus: "delayed"
       },
       {
         title: "Vendor complete IQ and turn over to site SSO",
+        planStart: `${scheduleYear}-05-05`,
+        planEnd: `${scheduleYear}-05-12`,
         start: `${scheduleYear}-05-05`,
-        end: `${scheduleYear}-05-12`
+        end: `${scheduleYear}-05-12`,
+        statusLabel: "延迟",
+        visualStatus: "delayed"
       },
       {
         title: "Site SSO complete OQ in TRN",
+        planStart: `${scheduleYear}-05-12`,
+        planEnd: `${scheduleYear}-05-21`,
         start: `${scheduleYear}-05-12`,
-        end: `${scheduleYear}-05-21`
+        end: `${scheduleYear}-05-21`,
+        statusLabel: "延迟",
+        visualStatus: "delayed",
+        blocker: "等待前序流程完成"
       },
       {
         title: "Cut over on pilot lines",
+        planStart: `${scheduleYear}-05-25`,
+        planEnd: `${scheduleYear}-05-29`,
         start: `${scheduleYear}-05-25`,
         end: `${scheduleYear}-05-29`,
-        note: "Pilot lines: 3"
+        note: "Pilot lines: 3",
+        statusLabel: "TBD",
+        visualStatus: "planned",
+        blocker: "等待前序流程完成"
       },
       {
         title: "Roll out solution to all lines",
+        planStart: `${scheduleYear}-06-01`,
+        planEnd: `${scheduleYear}-06-25`,
         start: `${scheduleYear}-06-01`,
         end: `${scheduleYear}-06-25`,
-        note: "Roll out lines: 8"
+        note: "Roll out lines: 8",
+        statusLabel: "TBD",
+        visualStatus: "planned",
+        blocker: "等待前序流程完成"
       }
     ];
 
@@ -677,6 +747,9 @@
       month: "short",
       day: "numeric"
     });
+
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
     const statusTextMap = {
       complete: "已完成",
@@ -701,55 +774,17 @@
       return Math.round((new Date(`${end}T00:00:00`) - new Date(`${start}T00:00:00`)) / dayMs) + 1;
     }
 
-    function overlapsRange(startA, endA, startB, endB) {
-      const aStart = new Date(`${startA}T00:00:00`);
-      const aEnd = new Date(`${endA}T00:00:00`);
-      const bStart = new Date(`${startB}T00:00:00`);
-      const bEnd = new Date(`${endB}T00:00:00`);
-      return aStart <= bEnd && bStart <= aEnd;
-    }
-
-    function getPhaseStatus(phase) {
-      const current = new Date(`${currentProgressDate}T00:00:00`);
-      const start = new Date(`${phase.start}T00:00:00`);
-      const end = new Date(`${phase.end}T00:00:00`);
-
-      if (overlapsRange(phase.start, phase.end, delayWindow.start, delayWindow.end)) {
-        return "delayed";
-      }
-
-      if (end < current) {
-        return "complete";
-      }
-
-      if (start <= current && current <= end) {
-        return "progress";
-      }
-
-      return "planned";
-    }
-
     function getDelayInfo(phase) {
-      if (!overlapsRange(phase.start, phase.end, delayWindow.start, delayWindow.end)) {
-        return { hasDelay: false };
+      if (phase.statusLabel === "按期完成") {
+        return { showDelay: false, delayDays: 0 };
       }
 
-      const phaseStart = new Date(`${phase.start}T00:00:00`);
-      const phaseEnd = new Date(`${phase.end}T00:00:00`);
-      const windowStart = new Date(`${delayWindow.start}T00:00:00`);
-      const windowEnd = new Date(`${delayWindow.end}T00:00:00`);
-
-      const overlapStart = new Date(Math.max(phaseStart.getTime(), windowStart.getTime()));
-      const overlapEnd = new Date(Math.min(phaseEnd.getTime(), windowEnd.getTime()));
-      const delayDays = Math.round((overlapEnd - overlapStart) / dayMs) + 1;
-      const overlapStartLabel = dateFormatter.format(overlapStart);
-      const overlapEndLabel = dateFormatter.format(overlapEnd);
+      const plannedEnd = new Date(`${phase.planEnd}T00:00:00`);
+      const delayDays = Math.max(0, Math.round((todayStart - plannedEnd) / dayMs));
 
       return {
-        hasDelay: true,
-        delayDays,
-        overlapStartLabel,
-        overlapEndLabel
+        showDelay: true,
+        delayDays
       };
     }
 
@@ -765,18 +800,47 @@
     }
 
     function renderSummary() {
+      const statusCounts = phases.reduce(
+        (accumulator, phase) => {
+          const key = phase.statusLabel;
+          accumulator[key] = (accumulator[key] || 0) + 1;
+          return accumulator;
+        },
+        { "按期完成": 0, "延迟": 0, "TBD": 0 }
+      );
+
       const cards = [
         {
-          label: "主要总结",
+          label: "主要信息",
           points: [
             { text: "费用影响：无" },
             { text: "业务影响：无" },
-            { text: "CPS影响：PE 202607交付，CL/PQ于FY2526交付", highlight: true }
+            {
+              text: "CPS影响：",
+              highlight: true,
+              subPoints: [
+                "Pilot 3 lines: CL/PQ Cutover before 2026.5.30, PE Cutover change to 2026.7.15.",
+                "Roll out 8 lines: CL/PQ Cutover before 2026.6.30, PE Cutover change to 2026.7.30."
+              ]
+            }
           ]
         },
-        { label: "项目阶段", value: `${phases.length}` },
+        {
+          label: "项目阶段",
+          points: [
+            { text: `总阶段：${phases.length}` },
+            { text: "当前阶段：3&4阶段", highlight: true }
+          ]
+        },
         { label: "总周期", value: `${totalDays}天` },
-        { label: "覆盖周数", value: `${totalWeeks}周` }
+        {
+          label: "状态统计",
+          points: [
+            { text: `按期完成：${statusCounts["按期完成"]}` },
+            { text: `延迟：${statusCounts["延迟"]}` },
+            { text: `TBD：${statusCounts["TBD"]}` }
+          ]
+        }
       ];
 
       summary.innerHTML = cards
@@ -786,7 +850,18 @@
               <span class="summary__label">${card.label}</span>
               ${card.points
                 ? `<ol class="summary__points">${card.points
-                    .map((point) => `<li class="${point.highlight ? "summary__point--highlight" : ""}">${point.text}</li>`)
+                    .map(
+                      (point, pointIndex) => `<li class="${point.highlight ? "summary__point--highlight" : ""}">
+                        ${point.text}
+                        ${point.subPoints
+                          ? `<ol class="summary__subpoints">${point.subPoints
+                              .map(
+                                (subPoint, subIndex) => `<li class="summary__point--highlight">${pointIndex + 1}.${subIndex + 1} ${subPoint}</li>`
+                              )
+                              .join("")}</ol>`
+                          : ""}
+                      </li>`
+                    )
                     .join("")}</ol>`
                 : `<div class="summary__value">${card.value}</div>`}
             </div>
@@ -820,9 +895,11 @@
         const midOffset = startOffset + (endOffset - startOffset) / 2;
         const isTop = index % 2 === 0;
         const duration = inclusiveDuration(phase.start, phase.end);
+        const planStartLabel = dateFormatter.format(new Date(`${phase.planStart}T00:00:00`));
+        const planEndLabel = dateFormatter.format(new Date(`${phase.planEnd}T00:00:00`));
         const startLabel = dateFormatter.format(new Date(`${phase.start}T00:00:00`));
         const endLabel = dateFormatter.format(new Date(`${phase.end}T00:00:00`));
-        const status = getPhaseStatus(phase);
+        const status = phase.visualStatus;
         const titleTheme = getTitleTheme(phase.title);
         const delayInfo = getDelayInfo(phase);
 
@@ -850,11 +927,13 @@
           <div class="phase__card phase__card--${status} phase__card--${titleTheme}">
             <div class="phase__index phase__index--${status}">${index + 1}</div>
             <h3 class="phase__title">${phase.title}</h3>
-            <p class="phase__dates">${startLabel} - ${endLabel}</p>
+            <p class="phase__dates">计划时间：${planStartLabel} - ${planEndLabel}</p>
+            <p class="phase__dates">当前时间：${startLabel} - ${endLabel}</p>
             <p class="phase__duration">Duration: ${duration} days</p>
-            <p class="phase__note">状态：${statusTextMap[status]}</p>
-            ${delayInfo.hasDelay ? `<p class="phase__note">延期时间：${delayInfo.overlapStartLabel} - ${delayInfo.overlapEndLabel}（${delayInfo.delayDays}天）</p>` : ""}
-            ${delayInfo.hasDelay ? `<p class="phase__note"><a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a></p>` : ""}
+            <p class="phase__note">状态：${phase.statusLabel}</p>
+            ${phase.blocker ? `<p class="phase__note">说明：${phase.blocker}</p>` : ""}
+            ${delayInfo.showDelay ? `<p class="phase__note">延期时间：${delayInfo.delayDays}天（计划截止日对比今天）</p>` : ""}
+            ${delayInfo.showDelay ? `<p class="phase__note"><a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a></p>` : ""}
             ${phase.note ? `<p class="phase__note">${phase.note}</p>` : ""}
           </div>
           <div class="phase__connector"></div>
@@ -883,6 +962,8 @@
           index,
           status,
           delayInfo,
+          planStartLabel,
+          planEndLabel,
           duration,
           startLabel,
           endLabel
@@ -892,18 +973,21 @@
 
     function renderTaskDetail(phaseItem) {
       const noteText = phaseItem.phase.note ? `${phaseItem.phase.note}；` : "";
-      const currentLabel = dateFormatter.format(new Date(`${currentProgressDate}T00:00:00`));
+      const todayLabel = dateFormatter.format(todayStart);
 
       taskDetail.innerHTML = `
         <div class="task-detail__label task-detail__label--${phaseItem.status}">${statusTextMap[phaseItem.status]}</div>
         <h2 class="task-detail__title">${phaseItem.index + 1}. ${phaseItem.phase.title}</h2>
         <div class="task-detail__meta">
-          <div class="task-detail__chip">时间：${phaseItem.startLabel} - ${phaseItem.endLabel}</div>
+          <div class="task-detail__chip">计划时间：${phaseItem.planStartLabel} - ${phaseItem.planEndLabel}</div>
+          <div class="task-detail__chip">当前时间：${phaseItem.startLabel} - ${phaseItem.endLabel}</div>
           <div class="task-detail__chip">周期：${phaseItem.duration} 天</div>
-          <div class="task-detail__chip">当前节点：${currentLabel}</div>
-          ${phaseItem.delayInfo.hasDelay ? `<div class="task-detail__chip">延期时间：${phaseItem.delayInfo.overlapStartLabel} - ${phaseItem.delayInfo.overlapEndLabel}（${phaseItem.delayInfo.delayDays}天）</div>` : ""}
+          <div class="task-detail__chip">今天：${todayLabel}</div>
+          <div class="task-detail__chip">状态：${phaseItem.phase.statusLabel}</div>
+          ${phaseItem.phase.blocker ? `<div class="task-detail__chip">说明：${phaseItem.phase.blocker}</div>` : ""}
+          ${phaseItem.delayInfo.showDelay ? `<div class="task-detail__chip">延期时间：${phaseItem.delayInfo.delayDays}天（计划截止日对比今天）</div>` : ""}
         </div>
-        <p class="task-detail__description">${noteText}${phaseItem.delayInfo.hasDelay ? `<a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a>；` : ""}</p>
+        <p class="task-detail__description">${noteText}${phaseItem.delayInfo.showDelay ? `<a class="delay-link" href="#delayCompPlan">查看延期补偿计划</a>；` : ""}</p>
       `;
     }
 
