@@ -600,6 +600,38 @@
       line-height: 1.7;
     }
 
+    .delay-plan__list li + li {
+      margin-top: 6px;
+    }
+
+    .delay-plan__tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .delay-plan__tag--no {
+      background: rgba(152, 163, 184, 0.2);
+      color: #60708f;
+    }
+
+    .delay-plan__tag--yes {
+      background: rgba(220, 38, 38, 0.12);
+      color: #b91c1c;
+    }
+
+    .delay-plan__note {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      padding-left: 4px;
+    }
+
     .delay-plan__section {
       margin-bottom: 16px;
     }
@@ -660,20 +692,25 @@
       <div class="footer-note"></div>
       <div class="task-detail" id="taskDetail"></div>
       <div class="delay-plan" id="delayCompPlan">
-        <h3>延期补偿计划</h3>
+        <h3>延期原因与补偿计划</h3>
         <div class="delay-plan__section">
-          <div class="delay-plan__section-title">延期原因：</div>
-          <ol class="delay-plan__section-list">
-            <li>PE 版本问题</li>
-            <li>新版本PE存在字段缺失问题需要联系Proficy product team 一起纠错导致时间耽误</li>
-                   </ol>
+          <div class="delay-plan__section-title">🔴 Challenge:</div>
+          <p class="delay-plan__section-list" style="padding-left:0;list-style:none;">Proficy vendor met a challenge: PO cannot change status when work on PE configuration. Trouble shooting lead time over 10 days.</p>
         </div>
         <div class="delay-plan__section">
-          <div class="delay-plan__section-title">补偿方案：</div>
+          <div class="delay-plan__section-title">🔍 Root Cause:</div>
+          <ul class="delay-plan__section-list">
+            <li>PE old version. <span class="delay-plan__tag delay-plan__tag--no">✗ Not root cause</span></li>
+            <li>新版本PE存在字段缺失. <span class="delay-plan__tag delay-plan__tag--yes">✓ Root cause</span>
+              <p class="delay-plan__note">(Vendor connected Proficy product team to do troubleshooting)</p>
+            </li>
+          </ul>
+        </div>
+        <div class="delay-plan__section">
+          <div class="delay-plan__section-title">✅ CPS Mitigation Plan:</div>
           <ol class="delay-plan__list">
-            <li>保CL/PQ，力争于FY2526完成Pilot lines 的cut over 和 roll out。</li>
-            <li>持续解决PE问题，先回滚PE使用SV完成CL/PQ，后续根据PE稳定性评估再决定是否恢复PE以及何时上线。</li>
-            <li>2026.07完成PE上线，并完成所有pilot lines的roll out；2026.09完成所有lines的roll out。</li>
+            <li>Stop PE on Tuesday, reverse PE to schedule view, enable CL/PQ go ahead.</li>
+            <li>Solve PE issue. And complete pilot lines' TRN test in June. Pilot 3 lines cutoff before 2026.7.15. Whole lines before 2026.7.30.</li>
           </ol>
         </div>
       </div>
